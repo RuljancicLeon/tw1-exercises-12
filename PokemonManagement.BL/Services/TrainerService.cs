@@ -30,9 +30,35 @@ namespace PokemonManagement.BL.Services
             _repository.Update(ownedPokemon);
         }
 
-        public void Evolve(TrainerPokemon ownedPokemon)
+        public void Evolve(int trainerPokemonId)
         {
-            // TODO Implement
+            var owndPkmn = _repository.GetBy(trainerPokemonId);
+            if(owndPkmn is null) throw new EntityNotFoundException();
+
+            assertPokemonLevel(owndPkmn);
+            assertTrainerCandies(owndPkmn);
+            assertNextEvolution(owndPkmn);
+
+            owndPkmn.PokemonId = (int) owndPkmn.Pokemon.EvolvesToId;
+            _repository.Update(owndPkmn);
+        }
+
+        private void assertNextEvolution(TrainerPokemon owndPkmn)
+        {
+            if (owndPkmn.Pokemon.EvolvesToId is null)
+                throw new PokemonLogicException("Pokemon no evolve");
+        }
+
+        private void assertTrainerCandies(TrainerPokemon owndPkmn)
+        {
+            if (owndPkmn.Trainer.Candies < 50)
+                throw new PokemonLogicException("No candies");
+        }
+
+        private void assertPokemonLevel(TrainerPokemon owndPkmn)
+        {
+            if (owndPkmn.Level < 16)
+                throw new PokemonLogicException("Pokemon is not level 16 or higher");
         }
     }
 }
